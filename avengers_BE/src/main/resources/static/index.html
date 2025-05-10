@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>영화 채팅 테스트</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+<h2>채팅방</h2>
+<div>
+    <input type="text" id="movieId" placeholder="Movie ID" />
+    <input type="text" id="sender" placeholder="보낸 사람" />
+    <input type="text" id="message" placeholder="메시지" />
+    <button onclick="sendMessage()">전송</button>
+</div>
+<ul id="chat"></ul>
+
+<script>
+    let stompClient = null;
+
+    function connect() {
+        const socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function () {
+            const movieId = document.getElementById("movieId").value;
+            stompClient.subscribe('/sub/chat/room/' + movieId, function (msg) {
+                const message = JSON.parse(msg.body);
+                const li = document.createElement("li");
+                li.innerText = `[${message.sender}] ${message.message}`;
+                document.getElementById("chat").appendChild(li);
+            });
+        });
+    }
+
+    function sendMessage() {
+        if (!stompClient || !stompClient.connected) {
+            connect();
+            // 잠깐 기다렸다가 메시지 전송 (연결 시간 확보용)
+            setTimeout(sendMessage, 500);
+            return;
+        }
+
+        const movieId = document.getElementById("movieId").value;
+        const sender = document.getElementById("sender").value;
+        const message = document.getElementById("message").value;
+
+        stompClient.send("/pub/chat/message", {}, JSON.stringify({
+            movieId: movieId,
+            sender: sender,
+            message: message
+        }));
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+# ========== Java & Gradle ==========
+*.class
+*.jar
+*.war
+*.log
+
+/build/
+/out/
+/bin/
+/.gradle/
+/target/
+.gradle
+build.gradle
+
+# gradle wrapper
+!gradle/wrapper/gradle-wrapper.jar
+
+# ========== IntelliJ IDEA ==========
+.idea/
+# ========== 환경 변수, 설정 ==========
+.env
+
+.gradle/
